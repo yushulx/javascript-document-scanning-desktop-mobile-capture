@@ -1,1 +1,2 @@
-# javascript-document-scanning-mobile-capture
+# JavaScript Document Scanning for Desktop and Mobile Browsers
+
