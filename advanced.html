@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Scan Document from Camera</title>
+    <script type="text/javascript" src="Resources/dynamsoft.webtwain.initiate.js"></script>
+    <script type="text/javascript" src="Resources/dynamsoft.webtwain.config.js"></script>
+    <script type="text/javascript" src="Resources/addon/dynamsoft.webtwain.addon.camera.js"></script>
+</head>
+
+<body>
+    <p>Camera List</p>
+    <select size="1" id="CameraSource" style="position: relative; width: 220px;" onchange="onCameraChange()"></select>
+    <input type="button" value="download" onclick="downloadDocument();" />
+
+    <div id="container"></div>
+
+    <script type="text/javascript">
+        var cameraObj, template;
+        Dynamsoft.DWT.CreateDWTObjectEx({
+            WebTwainId: 'camera',
+            UseLocalService: false
+        }, function (obj) {
+            cameraObj = obj;
+            template = cameraObj.Viewer.createTemplate("documentScanner");
+            cameraObj.Viewer.bind(document.getElementById('container'), template);
+            cameraObj.Viewer.width = 720;
+            cameraObj.Viewer.height = 720;
+            cameraObj.Viewer.show();
+            updateCameraList();
+        }, function (ec, es) {
+            console.log(es);
+        });
+
+        async function createCameraScanner(deviceId) {
+            await cameraObj.Addon.Camera.closeVideo();
+            cameraObj.Addon.Camera.scanDocument({
+                // element: container,
+                scannerViewer: {
+                    deviceId: deviceId,
+                    fullScreen: true
+                }
+
+            }).then(
+                function () { console.log("OK"); },
+                function (error) { console.log(error.message); });
+        }
+
+        function updateCameraList() {
+            if (!cameraObj) return;
+            var source = document.getElementById('CameraSource');
+            source.options.length = 0;
+            cameraObj.Addon.Camera.getSourceList().then((list) => {
+                for (var i = 0; i < list.length; i++) {
+                    var option = document.createElement('option');
+                    option.text = list[i].deviceId || list[i].label
+                    source.options.add(option);
+                }
+                createCameraScanner(source.options[source.options.length - 1].text);
+            });
+
+        }
+
+        function onCameraChange() {
+            if (!cameraObj) return;
+            var source = document.getElementById('CameraSource');
+            var index = source.selectedIndex;
+            if (index < 0) return;
+            var option = source.options[index];
+            cameraObj.Addon.Camera.selectSource(option.text).then(function (camera) {
+                // cameraObj.Addon.Camera.play();
+                createCameraScanner(option.text);
+            });
+        }
+
+        function downloadDocument() {
+            cameraObj.SaveAsJPEG("document", cameraObj.CurrentImageIndexInBuffer);
+        }
+    </script>
+</body>
+
+</html>

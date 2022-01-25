@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Scan Document from Scanner</title>
+    <script type="text/javascript" src="Resources/dynamsoft.webtwain.initiate.js"></script>
+    <script type="text/javascript" src="Resources/dynamsoft.webtwain.config.js"></script>
+</head>
+
+<body>
+    <input type="button" value="scan" onclick="acquireScanner();" />
+
+    <div id="container"></div>
+
+    <script type="text/javascript">
+        var scannerObj;
+        Dynamsoft.DWT.CreateDWTObjectEx({
+            WebTwainId: 'scanner',
+            UseLocalService: true,
+        }, function (obj) {
+            scannerObj = obj;
+            scannerObj.Viewer.bind(document.getElementById('container'));
+            scannerObj.Viewer.width = 480;
+            scannerObj.Viewer.height = 640;
+            scannerObj.Viewer.show();
+        }, function (ec, es) {
+            console.log(es);
+        });
+
+        function acquireScanner() {
+            if (scannerObj) {
+                scannerObj.SelectSource();
+                scannerObj.OpenSource();
+                scannerObj.IfDisableSourceAfterAcquire = true;
+                scannerObj.AcquireImage(() => {
+                    scannerObj.CloseSource();
+                }, () => {
+                    scannerObj.CloseSource();
+                });
+            }
+        }
+    </script>
+</body>
+</html>

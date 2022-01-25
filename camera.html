@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Scan Document from Camera</title>
+    <script type="text/javascript" src="Resources/dynamsoft.webtwain.initiate.js"></script>
+    <script type="text/javascript" src="Resources/dynamsoft.webtwain.config.js"></script>
+    <script type="text/javascript" src="Resources/addon/dynamsoft.webtwain.addon.camera.js"></script>
+</head>
+
+<body>
+    <input type="button" value="scan" onclick="acquireCamera();" />
+
+    <div id="container"></div>
+    <img id="img" src="" />
+
+    <script type="text/javascript">
+        var cameraObj;
+        Dynamsoft.DWT.CreateDWTObjectEx({
+            WebTwainId: 'camera',
+            UseLocalService: false,
+        }, function (obj) {
+            cameraObj = obj;
+            cameraObj.Viewer.bind(document.getElementById('container'));
+            cameraObj.Viewer.width = 480;
+            cameraObj.Viewer.height = 640;
+            cameraObj.Viewer.show();
+            cameraObj.Addon.Camera.play();
+        }, function (ec, es) {
+            console.log(es);
+        });
+
+        function acquireCamera() {
+            if (cameraObj) {
+                cameraObj.Addon.Camera.capture().then(function (result) {
+                    console.log(result);
+                    var objectURL = URL.createObjectURL(result);
+                    document.getElementById('img').src = objectURL;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
